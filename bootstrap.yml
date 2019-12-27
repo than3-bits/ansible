@@ -1,0 +1,30 @@
+---
+- hosts: all
+  gather_facts: False
+  pre_tasks:
+   - name: Install python 2.7 for ansible
+     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+     register: output
+     changed_when: output.stdout !=""
+     tags: always
+   - setup: #aka gather_facts
+  tasks:
+   - name: "Install Pre-Requisites for Ansible"
+     apt: name={{item}} state=installed
+     with_items:
+      - python-pip
+      - python-simplejson
+
+   - name: Set Non-Interactive for Iptables Persist IPv4
+     shell: "echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections"
+     tags: test
+
+   - name: Set Non-Interactive for Iptables Persist IPv6
+     shell: "echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections"
+     tags: test
+
+   - name: Install Dependency for Iptables_Raw Module (Iptables-persist)
+     apt: name={{item}} state=installed
+     with_items:
+       - iptables-persistent
+     tags: test
