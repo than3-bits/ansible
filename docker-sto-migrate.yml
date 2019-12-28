@@ -1,0 +1,69 @@
+---
+# docker_current_storage_path indicates source directory
+# storage_path indicates destination directory
+
+# Description: This module migrates the docker image store to a different directory
+# and creates/overwrites a tarball located at /var/lib/docker.tar.gz before
+# destructive changes are made. 
+
+- hosts: all
+  become: yes
+  vars:
+    docker_current_storage_path: '/var/lib/docker'
+    docker_storage_path: "{{ ( storage_path ) | default(docker_current_storage_path) }}"
+    storage_path: '/srv/docker'
+  tasks:
+    - name: "Migrate Docker Storage Path to another location"
+      fail: msg="storage path has not been defined"
+      when: storage_path is undefined
+
+    - name: "Check if destination exists"
+      stat: path=storage_path
+      register: st
+      tags: test
+
+#    - debug: msg="{{st}}"
+#      tags: debug
+
+    - name: stop-docker
+      service: name=docker state=stopped
+      tags: test
+
+    - name: "Create destination folder"
+      file: 
+        path: "{{storage_path}}"
+        state: directory
+        mode: 0600
+      when: (st.stat.exists!='false')
+      tags: test
+
+    - debug: msg="{{docker_current_storage_path}} {{storage_path}}"
+      tags: test
+
+    - name: "Copy Files to New Location"
+      shell: "cp -ar {{docker_current_storage_path}}/* {{storage_path}}/"
+      tags: test
+
+    - name: "tar old directory"
+      shell: "cd /var/lib && tar -zcvf ./docker.tar.gz ./docker/*"
+      tags: test
+
+    - name: "remove old docker dir"
+      shell: "rm -rf {{docker_current_storage_path}}"
+      tags: test
+
+    - name: "create shell link"
+      shell: "ln -s {{storage_path}} /var/lib/"
+      tags: test
+    
+      tags: test
+
+    - name: start-docker
+      service: name=docker state=started
+      tags: test
+
+
+  handlers:
+
+    - name: start-docker
+      service: name=docker state=started
