@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    docker_default_storage_path: '/var/lib/docker'
+    docker_storage_path: "{{ ( storage_path ) | default(docker_default_storage_path) }}"  
+#    storage_path: "path/to/here"
+  tasks:
+   - name: "Install Pre-Requisites for Docker"
+     apt: name={{item}} state=present
+     with_items:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+     
+   - name: "Install Docker's official GPG key"
+     shell: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+
+   - name: "Add Docker Repository"
+     shell: 'add-apt-repository \
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu 
+       $(lsb_release -cs) 
+       stable"'
+
+   - name: "Update APT Sources Cache"
+     apt:
+       update_cache: yes
+       cache_valid_time: 86400 #1Day 
+
+   - name: "Install Community Docker Engine"
+     apt: name={{item}} state=present
+     with_items:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+   - name: "Docker Hello World"
+     shell: "docker run hello-world"
+     register: status
+
+   - name: "debug - Docker stdout:"
+     debug: msg="{{status.stdout}}"
+     tags: debug
+
+   - name: "test - docker logic"
+     debug: msg="{{docker_storage_path}}"
+     tags: test
