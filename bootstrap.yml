@@ -28,3 +28,6 @@
      with_items:
        - iptables-persistent
      tags: test
+
+- name: Import AAA setup
+  import_playbook: bootstrap-aaa.yml

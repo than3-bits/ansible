@@ -1,0 +1,56 @@
+---
+- hosts: all
+  vars:
+    group_accounts: 
+      - { name: "remote_admins" }
+    users:
+      - { name: "svc_admin", groups: "remote_admins" }
+
+  tasks:
+#    - debug: 
+#        msg:
+#        - "System Groups: {{ group_accounts }}"
+#        - "User Groups: {{ users }} "
+
+    - name: "Add Groups"
+      group:
+        name: "{{ item.name }}"
+        state: present
+      with_items: "{{ group_accounts }}"
+
+    - name: "Check /etc/sudoers.d/99-custom exists"
+      stat: 
+        path: /etc/sudoers.d/99-custom 
+      register: st
+
+    - debug: 
+        msg: "{{st}}"
+
+    - name: "Touch file is not exist"
+      file: 
+        path: /etc/sudoers.d/99-custom
+        state: touch
+        mode: u=r,g=r,o=
+      when : st.stat.exists is defined
+
+    - name: "Add Remote Administrator Group to sudoers"
+      lineinfile: dest=/etc/sudoers.d/99-custom
+            regexp="%{{ item.name }} ALL"
+            line="%{{ item.name }} ALL=(ALL) NOPASSWD:ALL"
+            state=present
+      with_items: "{{ group_accounts }}"
+
+    - name: "Create User"
+      user: name={{ item.name }}
+            groups={{item.groups}}
+            shell="/bin/bash"
+            state=present
+      with_items: "{{ users }}"
+
+
+    - name: "Add non-root user pubkey for future passwordless connections"
+      authorized_key: user={{ item.name }} key="{{ lookup('file', 'keys/{{item.name}}') }}"
+      with_items: "{{users}}"
+
+
+
