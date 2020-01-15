@@ -49,5 +49,4 @@ There is some confusion over what license should apply to the ansible iptables_r
 
 https://github.com/Nordeus/ansible_iptables_raw
 
-I've also opened an issue up with them regarding the license and am awaiting a response.
-[here](https://github.com/Nordeus/ansible_iptables_raw/issues/29).
+I've opened an issue up regarding the missing license with them [here](https://github.com/Nordeus/ansible_iptables_raw/issues/29) and am awaiting a response.
