@@ -49,4 +49,10 @@ There is some confusion over what license should apply to the ansible iptables_r
 
 https://github.com/Nordeus/ansible_iptables_raw
 
-I've opened an issue up regarding the missing license with them [here](https://github.com/Nordeus/ansible_iptables_raw/issues/29) and am awaiting a response.
+I've opened an issue up regarding the missing license with them [here](https://github.com/Nordeus/ansible_iptables_raw/issues/29) and am awaiting a response. 
+
+Update Housekeeping: 2024 Received no response regarding iptables_raw, it appears the project is unmaintained.
+
+Additionally, and this should go without saying, given my professional background. No it is not a mistake that the keys in /keys were uploaded. If you were thinking honeypot... then yes you were correct.
+
+The keys in that directory are not actually valid keys being used for anything. At one point in time, if anyone had tried using those keys on one of my servers, the public address of the connection would have simply added itself to a blacklist, and I was toying around with a reputation based system to replace fail2ban given some failures at the time. The code needed improvement, and wasn't scalable, and while it provided some useful learning, ultimately it was shelved. It wasn't a mistake aside from all the automated spam I've received related to it.
